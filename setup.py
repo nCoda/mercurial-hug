@@ -61,11 +61,11 @@ setup(
     # metadata for upload to PyPI
     author = 'Christopher Antila',
     author_email = 'christopher@antila.ca',
-    description = 'An HTTP server that executes Python code.',
+    description = 'A wrapper for select Mercurial functionality.',
     long_description = _LONG_DESCRIPTION,
     license = 'AGPLv3+',
-    keywords = '',
-    url = '',
+    keywords = 'mercurial, vcs, version control, wrapper',
+    url = 'https://goldman.ncodamusic.org/diffusion/10/',
     classifiers =[
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python :: 2.7',
