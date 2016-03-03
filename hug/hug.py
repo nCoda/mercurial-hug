@@ -26,7 +26,7 @@
 Wrapper library for Mercurial.
 '''
 
-from os import path
+from os import listdir, path
 from mercurial import error, ui, hg, commands
 
 
@@ -35,9 +35,19 @@ class Hug(object):
     :class:`Hug` represents a Mercurial repository.
     '''
 
-    def __init__(self, repodir, *args, **kwargs):
+    def __init__(self, repodir, safe=False, *args, **kwargs):
         '''
         Create a :class:`Hug` instance, initializing the ``repodir`` repository if necessary.
+
+        :param str repodir: Pathname to the repository directory.
+        :para bool safe: Whether to insist on safe repository creation (see below). Default ``False``.
+        :raises: :exc:`mercurial.error.RepoError` if ``safe`` is ``True`` but we cannot be safe.
+        :raises: :exc:`~mercurial.error.RepoError` if ``repodir`` is not a directory or does not
+            exist.
+
+        If the ``safe`` argument is ``True``, we will raise a :exc:`RepoError` unless either the
+        repository directory is already initialized as a Mercurial repository, or the directory is
+        completely empty.
         '''
         super(Hug, self).__init__(*args, **kwargs)
         self._ui = ui.ui()
@@ -45,9 +55,14 @@ class Hug(object):
 
         repodir = path.abspath(repodir)
 
+        if not (path.exists(repodir) and path.isdir(repodir)):
+            raise error.RepoError('Repository path does not exist or is a file')
+
         try:
             self._repo = hg.repository(self._ui, repodir)
         except error.RepoError:
+            if safe and len(listdir(repodir)) > 0:
+                raise error.RepoError('Cannot safely initialize repository directory')
             commands.init(self._ui, repodir)
             self._repo = hg.repository(self._ui, repodir)
 
