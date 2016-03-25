@@ -49,7 +49,7 @@ class Hug(object):
         repository directory is already initialized as a Mercurial repository, or the directory is
         completely empty.
         '''
-        super(Hug, self).__init__(*args, **kwargs)
+        super(Hug, self).__init__()
         self._ui = ui.ui()
         self._repo = None
 
