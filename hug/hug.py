@@ -30,19 +30,22 @@ from os import listdir, path
 from mercurial import error, ui, hg, commands
 
 
+_REPO_DIR_NOT_EXIST = 'Repository path does not exist or is a file'
+_CANNOT_UNSAFE_INIT = 'Cannot safely initialize repository directory'
+
 class Hug(object):
     '''
     :class:`Hug` represents a Mercurial repository.
     '''
 
-    def __init__(self, repodir, safe=False, *args, **kwargs):
+    def __init__(self, repo_dir, safe=False):
         '''
-        Create a :class:`Hug` instance, initializing the ``repodir`` repository if necessary.
+        Create a :class:`Hug` instance, initializing the ``repo_dir`` repository if necessary.
 
-        :param str repodir: Pathname to the repository directory.
+        :param str repo_dir: Pathname to the repository directory.
         :para bool safe: Whether to insist on safe repository creation (see below). Default ``False``.
         :raises: :exc:`mercurial.error.RepoError` if ``safe`` is ``True`` but we cannot be safe.
-        :raises: :exc:`~mercurial.error.RepoError` if ``repodir`` is not a directory or does not
+        :raises: :exc:`~mercurial.error.RepoError` if ``repo_dir`` is not a directory or does not
             exist.
 
         If the ``safe`` argument is ``True``, we will raise a :exc:`RepoError` unless either the
@@ -53,18 +56,18 @@ class Hug(object):
         self._ui = ui.ui()
         self._repo = None
 
-        repodir = path.abspath(repodir)
+        repo_dir = path.abspath(repo_dir)
 
-        if not (path.exists(repodir) and path.isdir(repodir)):
-            raise error.RepoError('Repository path does not exist or is a file')
+        if not (path.exists(repo_dir) and path.isdir(repo_dir)):
+            raise error.RepoError(_REPO_DIR_NOT_EXIST)
 
         try:
-            self._repo = hg.repository(self._ui, repodir)
+            self._repo = hg.repository(self._ui, repo_dir)
         except error.RepoError:
-            if safe and len(listdir(repodir)) > 0:
-                raise error.RepoError('Cannot safely initialize repository directory')
-            commands.init(self._ui, repodir)
-            self._repo = hg.repository(self._ui, repodir)
+            if safe and len(listdir(repo_dir)) > 0:
+                raise error.RepoError(_CANNOT_UNSAFE_INIT)
+            commands.init(self._ui, repo_dir)
+            self._repo = hg.repository(self._ui, repo_dir)
 
     def add(self, pathnames):
         '''
