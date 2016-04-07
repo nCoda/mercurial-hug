@@ -57,6 +57,7 @@ class Hug(object):
         self._repo = None
 
         repo_dir = path.abspath(repo_dir)
+        self._repo_dir = repo_dir
 
         if not (path.exists(repo_dir) and path.isdir(repo_dir)):
             raise error.RepoError(_REPO_DIR_NOT_EXIST)
@@ -68,6 +69,13 @@ class Hug(object):
                 raise error.RepoError(_CANNOT_UNSAFE_INIT)
             commands.init(self._ui, repo_dir)
             self._repo = hg.repository(self._ui, repo_dir)
+
+    @property
+    def repo_dir(self):
+        '''
+        Return the absolute pathname to this repository's directory.
+        '''
+        return self._repo_dir
 
     def add(self, pathnames):
         '''

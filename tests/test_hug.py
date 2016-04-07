@@ -48,6 +48,12 @@ def temp_dir(request):
     return temp_dir
 
 
+@pytest.fixture()
+def repo(temp_dir):
+    "This PyTest fixture creates a Hug instance in a temporary directory."
+    return hug.Hug(temp_dir)
+
+
 class TestInit(object):
     '''
     Tests for Hug.__init__().
@@ -112,3 +118,22 @@ class TestInit(object):
         repo = hug.Hug(temp_dir, safe=False)
 
         assert os.path.exists(os.path.join(temp_dir, '.hg'))
+
+
+class TestRepoDirProperty(object):
+    '''
+    Tests for Hug.repo_dir
+    '''
+
+    def test_read_works(self, repo):
+        '''
+        The ``repo_dir`` property can be read.
+        '''
+        assert repo.repo_dir is repo._repo_dir
+
+    def test_write_doesnt_work(self, repo):
+        '''
+        The ``repo_dir`` property cannot be changed.
+        '''
+        with pytest.raises(AttributeError):
+            repo.repo_dir = 'bork'
