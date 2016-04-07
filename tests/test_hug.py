@@ -253,3 +253,41 @@ class TestAdd(object):
         with pytest.raises(RuntimeError) as exc:
             repo.add(['/bin/bash'])
         assert exc.value.args[0] == hug._FILE_NOT_IN_REPO_DIR.format('/bin/bash')
+
+
+class TestCommit(object):
+    '''
+    Tests for Hug.commit()
+    '''
+
+    def test_no_changes(self, repo):
+        '''
+        When there are no changes to commit, raise RuntimeError.
+        '''
+        with pytest.raises(RuntimeError) as exc:
+            repo.commit('a message')
+        assert exc.value.args[0] == hug._NOTHING_TO_COMMIT
+
+    def test_give_message(self, repo):
+        '''
+        When there are changes to commit, and a message is given.
+        '''
+        with open(os.path.join(repo.repo_dir, 'boring'), 'w') as temp_file:
+            temp_file.write('some file contents')
+        subprocess.check_call(['hg', 'add', 'boring'], cwd=repo.repo_dir)
+
+        repo.commit('a message')
+
+        assert repo._repo[0].description() == 'a message'
+
+    def test_no_message(self, repo):
+        '''
+        When there are changes to commit, but no message is given.
+        '''
+        with open(os.path.join(repo.repo_dir, 'boring'), 'w') as temp_file:
+            temp_file.write('some file contents')
+        subprocess.check_call(['hg', 'add', 'boring'], cwd=repo.repo_dir)
+
+        repo.commit()
+
+        assert repo._repo[0].description() == hug._DEFAULT_COMMIT_MESSAGE

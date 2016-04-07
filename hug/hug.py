@@ -34,6 +34,8 @@ from mercurial import error, ui, hg, commands
 _REPO_DIR_NOT_EXIST = 'Repository path does not exist or is a file'
 _CANNOT_UNSAFE_INIT = 'Cannot safely initialize repository directory'
 _FILE_NOT_IN_REPO_DIR = 'Cannot add file outside repository: {0}'
+_NOTHING_TO_COMMIT = 'There are no changes to commit'
+_DEFAULT_COMMIT_MESSAGE = '(empty commit message)'
 
 _STR = '<Hug repository for "{0}">'
 _REPR = 'Hug("{0}")'
@@ -133,15 +135,18 @@ class Hug(object):
 
         :param message: A commit message to use.
         :type message: str
+        :raises: :exc:`RuntimeError` if there are no added, deleted, modified, or removed files to
+            commit. We could silently ignore this, but "hg commit" returns a 1 status code if there
+            is nothing to commit, so this is more consistent.
 
-        If no commit message is supplied, an empty string is used.
+        If no commit message is supplied, a default is used
         '''
         # don't try to commit if nothing has changed
         stat = self._repo.status()
         if 0 == (len(stat.added) + len(stat.deleted) + len(stat.modified) + len(stat.removed)):
-            return
+            raise RuntimeError(_NOTHING_TO_COMMIT)
 
         if message is None:
-            message = ''
+            message = _DEFAULT_COMMIT_MESSAGE
 
         commands.commit(self._ui, self._repo, message=message)
