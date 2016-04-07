@@ -26,12 +26,14 @@
 Wrapper library for Mercurial.
 '''
 
-from os import listdir, path
+import os
+import os.path
 from mercurial import error, ui, hg, commands
 
 
 _REPO_DIR_NOT_EXIST = 'Repository path does not exist or is a file'
 _CANNOT_UNSAFE_INIT = 'Cannot safely initialize repository directory'
+_FILE_NOT_IN_REPO_DIR = 'Cannot add file outside repository: {0}'
 
 class Hug(object):
     '''
@@ -56,16 +58,16 @@ class Hug(object):
         self._ui = ui.ui()
         self._repo = None
 
-        repo_dir = path.abspath(repo_dir)
+        repo_dir = os.path.abspath(repo_dir)
         self._repo_dir = repo_dir
 
-        if not (path.exists(repo_dir) and path.isdir(repo_dir)):
+        if not (os.path.exists(repo_dir) and os.path.isdir(repo_dir)):
             raise error.RepoError(_REPO_DIR_NOT_EXIST)
 
         try:
             self._repo = hg.repository(self._ui, repo_dir)
         except error.RepoError:
-            if safe and len(listdir(repo_dir)) > 0:
+            if safe and len(os.listdir(repo_dir)) > 0:
                 raise error.RepoError(_CANNOT_UNSAFE_INIT)
             commands.init(self._ui, repo_dir)
             self._repo = hg.repository(self._ui, repo_dir)
@@ -83,12 +85,36 @@ class Hug(object):
 
         :param pathnames: Pathnames that may or may not be tracked in the repository.
         :type pathnames: list of string
+        :raises: :exc:`RuntimeError` is any of the files in ``pathnames`` are not in the repository
+            directory.
+
+        If any of the files in ``pathnames`` are not in the repository's directory, no files are
+        added and a :exc:`RuntimeError` is raised.
+
+        Files that are already tracked are silently ignored.
         '''
+        repo_dir = self.repo_dir
+
         # these paths are assumed to be in the repository directory, but "pathnames" may not be
         unknowns = self._repo.status(unknown=True).unknown
+
+        # make sure the pathnames-to-add are absolute
+        abs_pathnames = []
         for each_path in pathnames:
-            if path.split(each_path)[1] in unknowns:
-                commands.add(self._ui, self._repo, path.abspath(each_path))
+            if os.path.isabs(each_path):
+                abs_pathnames.append(each_path)
+            else:
+                abs_pathnames.append(os.path.abspath(os.path.join(repo_dir, each_path)))
+
+        for each_path in abs_pathnames:
+            if not each_path.startswith(repo_dir):
+                raise RuntimeError(_FILE_NOT_IN_REPO_DIR.format(each_path))
+
+        for each_path in abs_pathnames:
+            relative_to_repo = each_path.replace(repo_dir, '')[1:]  # replace() leaves a leading /
+            if relative_to_repo in unknowns:
+                # only call add() for untracked files
+                commands.add(self._ui, self._repo, each_path)
 
     def commit(self, message=None):
         '''

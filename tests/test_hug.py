@@ -26,6 +26,7 @@
 Tests for "hug.py."
 '''
 
+import os
 import os.path
 import shutil
 import subprocess
@@ -137,3 +138,110 @@ class TestRepoDirProperty(object):
         '''
         with pytest.raises(AttributeError):
             repo.repo_dir = 'bork'
+
+
+class TestAdd(object):
+    '''
+    Tests for Hug.add().
+    '''
+
+    def test_add_no_files(self, repo):
+        '''
+        Call add() with an empty list; it shouldn't do anything.
+        '''
+        with open(os.path.join(repo.repo_dir, 'boring'), 'w') as temp_file:
+            temp_file.write('some file contents')
+
+        repo.add([])
+
+        status = repo._repo.status()
+        assert status.added == []
+        # NB: I don't know why this commented assertion fails... ?
+        # assert status.unknown == ['boring']
+        status = subprocess.check_output(['hg', 'status'], cwd=repo.repo_dir)
+        assert '? boring' in status
+
+    def test_add_one_file_1(self, repo):
+        '''
+        Call add() with a single file (relative pathname) that isn't already added; the file should
+        be added.
+        '''
+        with open(os.path.join(repo.repo_dir, 'boring'), 'w') as temp_file:
+            temp_file.write('some file contents')
+
+        repo.add(['boring'])
+
+        status = repo._repo.status()
+        assert status.added == ['boring']
+
+    def test_add_one_file_2(self, repo):
+        '''
+        Call add() with a single file (absolute pathname) that isn't already added; the file should
+        be added.
+        '''
+        abs_path = os.path.abspath(os.path.join(repo.repo_dir, 'boring'))
+        with open(abs_path, 'w') as temp_file:
+            temp_file.write('some file contents')
+
+        repo.add([abs_path])
+
+        status = repo._repo.status()
+        assert status.added == ['boring']
+
+    def test_add_one_file_3(self, repo):
+        '''
+        Call add() with a single file (relative pathname, in a subdirectory) that isn't already
+        added; the file should be added.
+        '''
+        os.mkdir(os.path.join(repo.repo_dir, 'lol'))
+        rel_path = os.path.join('lol', 'boring')
+        abs_path = os.path.abspath(os.path.join(repo.repo_dir, rel_path))
+        with open(abs_path, 'w') as temp_file:
+            temp_file.write('some file contents')
+
+        repo.add([rel_path])
+
+        status = repo._repo.status()
+        assert status.added == ['lol/boring']
+
+    def test_add_three_files(self, repo):
+        '''
+        Call add() with three files that aren't already added; the files should be added.
+        '''
+        filenames = ['aoring', 'boring', 'coring']
+        for filename in filenames:
+            with open(os.path.join(repo.repo_dir, filename), 'w') as temp_file:
+                temp_file.write('some file contents')
+
+        repo.add(filenames)
+
+        status = repo._repo.status()
+        assert len(status.added) == len(filenames)
+        for filename in filenames:
+            assert filename in status.added
+
+    def test_add_already_added(self, repo):
+        '''
+        Call add() with files that were already added; it shouldn't do anything.
+        '''
+        with open(os.path.join(repo.repo_dir, 'boring'), 'w') as temp_file:
+            temp_file.write('some file contents')
+        subprocess.check_call(['hg', 'add', 'boring'], cwd=repo.repo_dir)
+        # pre-check: the file is already added
+        status = repo._repo.status()
+        assert status.added == ['boring']
+
+        # function under test
+        repo.add(['boring'])
+
+        # post-check: the file is still added
+        status = repo._repo.status()
+        assert status.added == ['boring']
+
+    def test_not_in_repo_dir(self, repo):
+        '''
+        Call add() with a file that's not in the repo_dir; it should raise RuntimeError.
+        '''
+        with pytest.raises(RuntimeError) as exc:
+            repo.add(['/bin/bash'])
+        assert exc.value.args[0] == hug._FILE_NOT_IN_REPO_DIR.format('/bin/bash')
