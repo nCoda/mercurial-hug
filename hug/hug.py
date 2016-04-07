@@ -31,18 +31,32 @@ import os.path
 from mercurial import error, ui, hg, commands
 
 
+# translatable strings
+# error messages
 _REPO_DIR_NOT_EXIST = 'Repository path does not exist or is a file'
 _CANNOT_UNSAFE_INIT = 'Cannot safely initialize repository directory'
 _FILE_NOT_IN_REPO_DIR = 'Cannot add file outside repository: {0}'
 _NOTHING_TO_COMMIT = 'There are no changes to commit'
+# defaults
 _DEFAULT_COMMIT_MESSAGE = '(empty commit message)'
-
+_DEFAULT_USERNAME = '(unknown user)'
+# templates for magic methods
 _STR = '<Hug repository for "{0}">'
 _REPR = 'Hug("{0}")'
+
 
 class Hug(object):
     '''
     :class:`Hug` represents a Mercurial repository.
+
+    Because :meth:`commit` requires a username, ``mercurial-hug`` provides a default if nothing is
+    available. The username may come from one of three places:
+
+    #. The value provided to the :attr:`username` property at runtime. If this is not available,
+    #. The value Mercurial would use if called on the commandline. If this is not available,
+    #. A default provided by ``mercurial-hug``. At the moment, the default in English is
+       "(unknown user)".
+
     '''
 
     def __init__(self, repo_dir, safe=False):
@@ -62,6 +76,7 @@ class Hug(object):
         super(Hug, self).__init__()
         self._ui = ui.ui()
         self._repo = None
+        self._username = None
 
         repo_dir = os.path.abspath(repo_dir)
         self._repo_dir = repo_dir
@@ -150,3 +165,31 @@ class Hug(object):
             message = _DEFAULT_COMMIT_MESSAGE
 
         commands.commit(self._ui, self._repo, message=message)
+
+    def _get_username(self):
+        "Return the username in order of preference."
+        if self._username:
+            return self._username
+        else:
+            try:
+                return self._ui.username()
+            except error.Abort:
+                return _DEFAULT_USERNAME
+
+    def _set_username(self, username):
+        "Set a Hug-specific username."
+        self._username = username
+
+    def _del_username(self):
+        "Unset a Hug-specific username."
+        self._username = None
+
+    username = property(_get_username, _set_username, _del_username,
+        '''
+        Username for commits.
+
+        If you set the username, it will be used for every commit until you ``del`` to unset the
+        custom username. If you delete or do not set a username, ``mercurial-hug`` uses the same
+        username that Mercurial would use on the commandline. If no username is set and Mercurial
+        does not have a username set either, a default stand-in is used.
+        ''')

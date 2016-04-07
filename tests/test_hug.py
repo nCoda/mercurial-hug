@@ -32,6 +32,11 @@ import shutil
 import subprocess
 import tempfile
 
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
 from mercurial import error
 import pytest
 
@@ -52,7 +57,9 @@ def temp_dir(request):
 @pytest.fixture()
 def repo(temp_dir):
     "This PyTest fixture creates a Hug instance in a temporary directory."
-    return hug.Hug(temp_dir)
+    repo = hug.Hug(temp_dir)
+    repo.username = 'this is set to prevent a crash'
+    return repo
 
 
 class TestInit(object):
@@ -291,3 +298,29 @@ class TestCommit(object):
         repo.commit()
 
         assert repo._repo[0].description() == hug._DEFAULT_COMMIT_MESSAGE
+
+
+def test_username_property(repo):
+    '''
+    Test the username property.
+    '''
+    ui_mock = mock.Mock()
+    ui_mock.username = mock.Mock(side_effect=error.Abort)
+    repo._ui = ui_mock
+
+    # test the mercurial-hug fallback username
+    ui_mock.username = mock.Mock(side_effect=error.Abort)
+    repo._username = None
+    assert repo.username == hug._DEFAULT_USERNAME
+
+    # test the Mercurial fallback
+    ui_mock.username = mock.Mock(return_value='A-Lin')
+    assert repo.username == 'A-Lin'
+
+    # test setting a mercurial-hug override username
+    repo.username = '张靓颖'
+    assert repo.username == '张靓颖'
+
+    # test deleting the override
+    del repo.username
+    assert repo.username == 'A-Lin'
