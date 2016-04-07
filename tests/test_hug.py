@@ -278,14 +278,17 @@ class TestCommit(object):
     def test_give_message(self, repo):
         '''
         When there are changes to commit, and a message is given.
+        Also check that the username is used.
         '''
         with open(os.path.join(repo.repo_dir, 'boring'), 'w') as temp_file:
             temp_file.write('some file contents')
         subprocess.check_call(['hg', 'add', 'boring'], cwd=repo.repo_dir)
+        repo.username = 'HUSH'
 
         repo.commit('a message')
 
         assert repo._repo[0].description() == 'a message'
+        assert repo._repo[0].user() == 'HUSH'
 
     def test_no_message(self, repo):
         '''

@@ -154,7 +154,9 @@ class Hug(object):
             commit. We could silently ignore this, but "hg commit" returns a 1 status code if there
             is nothing to commit, so this is more consistent.
 
-        If no commit message is supplied, a default is used
+        If no commit message is supplied, a default is used.
+
+        Use the :attr:`username` property to set a username for the commit, or a default is used.
         '''
         # don't try to commit if nothing has changed
         stat = self._repo.status()
@@ -164,7 +166,7 @@ class Hug(object):
         if message is None:
             message = _DEFAULT_COMMIT_MESSAGE
 
-        commands.commit(self._ui, self._repo, message=message)
+        commands.commit(self._ui, self._repo, message=message, user=self.username)
 
     def _get_username(self):
         "Return the username in order of preference."
