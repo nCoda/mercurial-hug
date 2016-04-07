@@ -140,6 +140,14 @@ class TestRepoDirProperty(object):
             repo.repo_dir = 'bork'
 
 
+class TestStringRepr(object):
+    def test_string(self, repo):
+        assert repo.__str__() == hug._STR.format(repo.repo_dir)
+
+    def test_repr(self, repo):
+        assert repo.__repr__() == hug._REPR.format(repo.repo_dir)
+
+
 class TestAdd(object):
     '''
     Tests for Hug.add().

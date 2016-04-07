@@ -35,6 +35,9 @@ _REPO_DIR_NOT_EXIST = 'Repository path does not exist or is a file'
 _CANNOT_UNSAFE_INIT = 'Cannot safely initialize repository directory'
 _FILE_NOT_IN_REPO_DIR = 'Cannot add file outside repository: {0}'
 
+_STR = '<Hug repository for "{0}">'
+_REPR = 'Hug("{0}")'
+
 class Hug(object):
     '''
     :class:`Hug` represents a Mercurial repository.
@@ -72,6 +75,14 @@ class Hug(object):
             commands.init(self._ui, repo_dir)
             self._repo = hg.repository(self._ui, repo_dir)
 
+    def __str__(self):
+        "Does the string thing."
+        return _STR.format(self.repo_dir)
+
+    def __repr__(self):
+        "Does the repr thing."
+        return _REPR.format(self.repo_dir)
+
     @property
     def repo_dir(self):
         '''
@@ -85,7 +96,7 @@ class Hug(object):
 
         :param pathnames: Pathnames that may or may not be tracked in the repository.
         :type pathnames: list of string
-        :raises: :exc:`RuntimeError` is any of the files in ``pathnames`` are not in the repository
+        :raises: :exc:`RuntimeError` if any of the files in ``pathnames`` are not in the repository
             directory.
 
         If any of the files in ``pathnames`` are not in the repository's directory, no files are
