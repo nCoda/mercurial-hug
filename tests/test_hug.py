@@ -327,3 +327,43 @@ def test_username_property(repo):
     # test deleting the override
     del repo.username
     assert repo.username == 'A-Lin'
+
+
+class TestSummary(object):
+    '''
+    Tests for Hug.summary().
+    '''
+
+    def test_works_mocked(self, repo):
+        '''
+        Test this "summary" message from the commandline:
+
+        parent: 41:d16397e87778
+         Change @xml:id of <section> to valid Lychee-MEI
+        branch: default
+        commit: (clean)
+        update: 29 new changesets (update)
+        '''
+        expected = {
+            'parent': '41:d16397e87778',
+            'message': 'Change @xml:id of <section> to valid Lychee-MEI',
+            'branch': 'default',
+            'commit': '(clean)',
+            'update': '29 new changesets (update)',
+        }
+        summary = 'parent: 41:d16397e87778 \n Change @xml:id of <section> to valid Lychee-MEI\nbranch: default\ncommit: (clean)\nupdate: 29 new changesets (update)\n'
+        repo._ui = mock.Mock()
+        repo._ui.popbuffer = mock.Mock(return_value=summary)
+        actual = repo.summary()
+        assert expected == actual
+
+    def test_empty_return_mocked(self, repo):
+        '''
+        Test when the "summary" command returns an empty string.
+        '''
+        summary = ''
+        repo._ui = mock.Mock()
+        repo._ui.popbuffer = mock.Mock(return_value=summary)
+        with pytest.raises(RuntimeError) as exc:
+            repo.summary()
+        assert exc.value.args[0] == hug._MISSING_SUMMARY_FIELDS

@@ -37,6 +37,7 @@ _REPO_DIR_NOT_EXIST = 'Repository path does not exist or is a file'
 _CANNOT_UNSAFE_INIT = 'Cannot safely initialize repository directory'
 _FILE_NOT_IN_REPO_DIR = 'Cannot add file outside repository: {0}'
 _NOTHING_TO_COMMIT = 'There are no changes to commit'
+_MISSING_SUMMARY_FIELDS = 'Expected at least "parent" and "message"; repository may be corrupted.'
 # defaults
 _DEFAULT_COMMIT_MESSAGE = '(empty commit message)'
 _DEFAULT_USERNAME = '(unknown user)'
@@ -195,3 +196,52 @@ class Hug(object):
         username that Mercurial would use on the commandline. If no username is set and Mercurial
         does not have a username set either, a default stand-in is used.
         ''')
+
+    def summary(self):
+        '''
+        Get a summary of the repository state.
+
+        :returns: A dictionary summarizing the repository state; see below.
+        :rtype: dict
+        :raises: :exc:`RuntimeError` if at least the "parent" and "message" field are not available,
+            which indicates a serious problem with the repository.
+
+        If running ``hg summary`` on the commandline returns this:
+
+        ..
+            parent: 41:d16397e87778
+             Change @xml:id of <section> to valid Lychee-MEI
+            branch: default
+            commit: (clean)
+            update: 29 new changesets (update)
+
+        Then :meth:`summary` will return this dictionary:
+
+        ..
+            {
+                'parent': '41:d16397e87778',
+                'message': 'Change @xml:id of <section> to valid Lychee-MEI',
+                'branch': 'default',
+                'commit': '(clean)',
+                'update': '29 new changesets (update)',
+            }
+
+        '''
+        self._ui.pushbuffer()
+        commands.summary(self._ui, self._repo)
+        summary = self._ui.popbuffer()
+
+        post = {}
+        summary = summary.split('\n')
+        if len(summary) < 2:
+            raise RuntimeError(_MISSING_SUMMARY_FIELDS)
+
+        post['parent'] = summary[0][8:].strip()
+        post['message'] = summary[1].strip()
+
+        for field in summary[2:]:
+            if field:
+                split = field.split(': ')
+                post[split[0]] = ''.join(split[1:])
+
+        return post
