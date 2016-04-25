@@ -367,3 +367,15 @@ class TestSummary(object):
         with pytest.raises(RuntimeError) as exc:
             repo.summary()
         assert exc.value.args[0] == hug._MISSING_SUMMARY_FIELDS
+
+
+@mock.patch('mercurial.commands.update')
+def test_update(mock_update, repo):
+    '''
+    Test for Hug.update().
+    '''
+    rev = '112233'
+    clean = True
+    check = True
+    repo.update(rev=rev, clean=clean, check=check)
+    mock_update.assert_called_with(repo._ui, repo._repo, rev=rev, clean=clean, check=check)

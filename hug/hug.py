@@ -245,3 +245,25 @@ class Hug(object):
                 post[split[0]] = ''.join(split[1:])
 
         return post
+
+    def update(self, rev=None, clean=False, check=False):
+        '''
+        Update working directory (or switch revisions).
+
+        :param str rev: The changeset to update to (either by revision number or hash).
+        :param bool clean: If ``True``, any changes in the working directory are lost.
+        :param bool check: If ``True``, any changes in the working directory cause the update to fail.
+
+        (From the Mercurial documentation):
+
+        Update the repository's working directory to the specified changeset. If no changeset is
+        specified, update to the tip of the current named branch and move the current bookmark.
+
+        Update sets the working directory's parent revision to the specified changeset.
+
+        If the changeset is not a descendant or ancestor of the working directory's parent, the
+        update is aborted. With the ``check`` option, the working directory is checked for
+        uncommitted changes; if none are found, the working directory is updated to the specified
+        changeset.
+        '''
+        commands.update(self._ui, self._repo, rev=rev, clean=clean, check=check)
