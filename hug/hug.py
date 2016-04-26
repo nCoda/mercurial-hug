@@ -38,6 +38,7 @@ _CANNOT_UNSAFE_INIT = 'Cannot safely initialize repository directory'
 _FILE_NOT_IN_REPO_DIR = 'Cannot add file outside repository: {0}'
 _NOTHING_TO_COMMIT = 'There are no changes to commit'
 _MISSING_SUMMARY_FIELDS = 'Expected at least "parent" and "message"; repository may be corrupted.'
+_UNKNOWN_REVISION = 'Unknown revision; could not run "update."'
 # defaults
 _DEFAULT_COMMIT_MESSAGE = '(empty commit message)'
 _DEFAULT_USERNAME = '(unknown user)'
@@ -253,6 +254,7 @@ class Hug(object):
         :param str rev: The changeset to update to (either by revision number or hash).
         :param bool clean: If ``True``, any changes in the working directory are lost.
         :param bool check: If ``True``, any changes in the working directory cause the update to fail.
+        :raises: :exc:`RuntimeError` when ``rev`` doesn't refer to a valid revision.
 
         (From the Mercurial documentation):
 
@@ -266,4 +268,7 @@ class Hug(object):
         uncommitted changes; if none are found, the working directory is updated to the specified
         changeset.
         '''
-        commands.update(self._ui, self._repo, rev=rev, clean=clean, check=check)
+        try:
+            commands.update(self._ui, self._repo, rev=rev, clean=clean, check=check)
+        except error.RepoLookupError:
+            raise RuntimeError(_UNKNOWN_REVISION)

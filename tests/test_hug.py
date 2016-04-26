@@ -370,12 +370,23 @@ class TestSummary(object):
 
 
 @mock.patch('mercurial.commands.update')
-def test_update(mock_update, repo):
+def test_update_works(mock_update, repo):
     '''
-    Test for Hug.update().
+    Test for Hug.update() where it works.
     '''
     rev = '112233'
     clean = True
     check = True
     repo.update(rev=rev, clean=clean, check=check)
     mock_update.assert_called_with(repo._ui, repo._repo, rev=rev, clean=clean, check=check)
+
+
+@mock.patch('mercurial.commands.update')
+def test_update_fails(mock_update, repo):
+    '''
+    Test for Hug.update() where the revision is unknown.
+    '''
+    mock_update.side_effect = error.RepoLookupError('lol')
+    with pytest.raises(RuntimeError) as exc:
+        repo.update()
+    assert exc.value.args[0] == hug._UNKNOWN_REVISION
