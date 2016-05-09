@@ -146,12 +146,13 @@ class Hug(object):
                 # only call add() for untracked files
                 commands.add(self._ui, self._repo, each_path)
 
-    def commit(self, message=None):
+    def commit(self, message=None, date=None):
         '''
-        Make a new commit, optionally with the supplied commit message.
+        Make a new commit, optionally with the supplied commit message and date.
 
-        :param message: A commit message to use.
-        :type message: str
+        :param str message: A commit message to use.
+        :param str date: A date to use. This should be the same format as used in ``hg log``, like
+            ``'Tue Apr 19 15:00:00 2016 -0500'``.
         :raises: :exc:`RuntimeError` if there are no added, deleted, modified, or removed files to
             commit. We could silently ignore this, but "hg commit" returns a 1 status code if there
             is nothing to commit, so this is more consistent.
@@ -168,7 +169,7 @@ class Hug(object):
         if message is None:
             message = _DEFAULT_COMMIT_MESSAGE
 
-        commands.commit(self._ui, self._repo, message=message, user=self.username)
+        commands.commit(self._ui, self._repo, message=message, user=self.username, date=date)
 
     def _get_username(self):
         "Return the username in order of preference."

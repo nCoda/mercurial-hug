@@ -26,6 +26,7 @@
 Tests for "hug.py."
 '''
 
+import datetime
 import os
 import os.path
 import shutil
@@ -275,9 +276,9 @@ class TestCommit(object):
             repo.commit('a message')
         assert exc.value.args[0] == hug._NOTHING_TO_COMMIT
 
-    def test_give_message(self, repo):
+    def test_message_no_date(self, repo):
         '''
-        When there are changes to commit, and a message is given.
+        When there are changes to commit and a message is given, but not a date.
         Also check that the username is used.
         '''
         with open(os.path.join(repo.repo_dir, 'boring'), 'w') as temp_file:
@@ -290,17 +291,21 @@ class TestCommit(object):
         assert repo._repo[0].description() == 'a message'
         assert repo._repo[0].user() == 'HUSH'
 
-    def test_no_message(self, repo):
+    def test_date_no_message(self, repo):
         '''
-        When there are changes to commit, but no message is given.
+        When there are changes to commit and a date is given, but no message.
         '''
+        # NB: this test assumes UTC timezone
         with open(os.path.join(repo.repo_dir, 'boring'), 'w') as temp_file:
             temp_file.write('some file contents')
         subprocess.check_call(['hg', 'add', 'boring'], cwd=repo.repo_dir)
+        date = 'Tue Apr 19 15:00:00 2016 -0000'
+        expected_date = datetime.datetime(2016, 4, 19, 15, 0, 0)
 
-        repo.commit()
+        repo.commit(date=date)
 
         assert repo._repo[0].description() == hug._DEFAULT_COMMIT_MESSAGE
+        assert expected_date == datetime.datetime.utcfromtimestamp(repo._repo[0].date()[0])
 
 
 def test_username_property(repo):
