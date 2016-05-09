@@ -1,4 +1,5 @@
 -e .
+mock>2,<3
 pytest>2.7,<3
 python-coveralls
 pytest-cov>2,<3
