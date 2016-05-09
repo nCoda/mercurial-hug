@@ -26,7 +26,7 @@
 Main initialization file.
 '''
 
-__version__ = '0.3.1'
+__version__ = '0.4.0'
 
 
 # try to import ourselves; but if Mercurial isn't installed that's probably okay
