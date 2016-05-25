@@ -53,7 +53,7 @@ setup(
     version = hug.__version__,
     packages = ['hug'],
 
-    install_requires = ['mercurial>3.4,<3.8'],
+    install_requires = ['mercurial>3.4,<3.5'],
     tests_require = ['pytest>2.7,<3'],
 
     cmdclass = {'test': PyTest},
