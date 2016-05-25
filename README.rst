@@ -22,3 +22,5 @@ Hosted on GitHub?!
 I know it's a little weird to host a project about Mercurial in a Git repository, but BitBucket is
 not impressive, and basically I didn't think it was worth off-GitHub hosting just for this small
 library. Sorry!
+
+!
