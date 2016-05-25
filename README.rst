@@ -1,6 +1,10 @@
 mercurial-hug
 =============
 
+.. image:: https://travis-ci.org/nCoda/mercurial-hug.svg?branch=main
+    :target: https://travis-ci.org/nCoda/mercurial-hug
+    :alt: Build status on Travis-CI.
+
 This library provides a wrapper around select Mercurial functionality. We aim for the wrapper to be
 friendlier to use than Mercurial itself (the libraries, that is, which are largely undocumented) and
 also to provide a stable API. To achieve this, we will implement *only* the functionality we need,
