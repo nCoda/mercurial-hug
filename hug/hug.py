@@ -44,7 +44,7 @@ _DEFAULT_COMMIT_MESSAGE = '(empty commit message)'
 _DEFAULT_USERNAME = '(unknown user)'
 # templates for magic methods
 _STR = '<Hug repository for "{0}">'
-_REPR = 'Hug("{0}")'
+_REPR = "Hug('{0}')"
 
 
 class Hug(object):
