@@ -4,6 +4,9 @@ mercurial-hug
 .. image:: https://travis-ci.org/nCoda/mercurial-hug.svg?branch=main
     :target: https://travis-ci.org/nCoda/mercurial-hug
     :alt: Build status on Travis-CI.
+.. image:: https://coveralls.io/repos/github/nCoda/mercurial-hug/badge.svg?branch=main
+    :target: https://coveralls.io/github/nCoda/mercurial-hug?branch=main
+    :alt: Test suite coverage on Coveralls.
 
 This library provides a wrapper around select Mercurial functionality. We aim for the wrapper to be
 friendlier to use than Mercurial itself (the libraries, that is, which are largely undocumented) and
