@@ -357,7 +357,6 @@ class TestSummary(object):
             'update': '29 new changesets (update)',
         }
         summary = 'parent: 41:d16397e87778 \n Change @xml:id of <section> to valid Lychee-MEI\nbranch: default\ncommit: (clean)\nupdate: 29 new changesets (update)\n'
-        repo._ui = mock.Mock()
         repo._ui.popbuffer = mock.Mock(return_value=summary)
         actual = repo.summary()
         assert expected == actual
@@ -367,7 +366,6 @@ class TestSummary(object):
         Test when the "summary" command returns an empty string.
         '''
         summary = ''
-        repo._ui = mock.Mock()
         repo._ui.popbuffer = mock.Mock(return_value=summary)
         with pytest.raises(RuntimeError) as exc:
             repo.summary()
