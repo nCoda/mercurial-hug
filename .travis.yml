@@ -3,7 +3,10 @@ python:
   - "pypy"
   - "2.7"
 env:
-  - HG_VERSION="3.4.3"
+  - HG_VERSION="3.4.2"
+  - HG_VERSION="3.5.2"
+  - HG_VERSION="3.6.3"
+  - HG_VERSION="3.7.3"
   - HG_VERSION="3.8.2"
 install:
   - pip install -r requirements.txt
