@@ -1,9 +1,9 @@
 mercurial-hug
 =============
 
-.. image:: https://travis-ci.org/nCoda/mercurial-hug.svg?branch=main
-    :target: https://travis-ci.org/nCoda/mercurial-hug
-    :alt: Build status on Travis-CI.
+.. image:: https://circleci.com/gh/nCoda/mercurial-hug.svg?style=svg
+    :target: https://circleci.com/gh/nCoda/mercurial-hug
+    :alt: Build status on CircleCI.
 .. image:: https://coveralls.io/repos/github/nCoda/mercurial-hug/badge.svg?branch=main
     :target: https://coveralls.io/github/nCoda/mercurial-hug?branch=main
     :alt: Test suite coverage on Coveralls.

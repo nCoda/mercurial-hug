@@ -1,0 +1,12 @@
+machine:
+  python:
+    version: 2.7.11
+
+dependencies:
+  override:
+    - pip install -U setuptools pip
+    - pip install -e .
+
+test:
+  override:
+    - py.test --cov=hug --junit-xml=$CIRCLE_TEST_REPORTS/pytest/junit.xml
