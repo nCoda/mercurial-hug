@@ -83,7 +83,7 @@ class Hug(object):
         super(Hug, self).__init__()
 
         if not _mercurial_imported:
-            raise Exception("The Python module 'mercurial' is not installed, so mercurial-hug is disabled.")
+            raise RuntimeError("The Python module 'mercurial' is not installed, so mercurial-hug is disabled.")
 
         self._ui = ui.ui()
         self._repo = None
