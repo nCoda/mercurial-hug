@@ -28,7 +28,12 @@ Wrapper library for Mercurial.
 
 import os
 import os.path
-from mercurial import error, ui, hg, commands
+
+_mercurial_imported = True
+try:
+    from mercurial import error, ui, hg, commands
+except ImportError:
+    _mercurial_imported = False
 
 
 # translatable strings
@@ -76,6 +81,10 @@ class Hug(object):
         completely empty.
         '''
         super(Hug, self).__init__()
+
+        if not _mercurial_imported:
+            raise Exception("The Python module 'mercurial' is not installed, so mercurial-hug is disabled.")
+
         self._ui = ui.ui()
         self._repo = None
         self._username = None
