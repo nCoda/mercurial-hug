@@ -39,6 +39,7 @@ _FILE_NOT_IN_REPO_DIR = 'Cannot add file outside repository: {0}'
 _NOTHING_TO_COMMIT = 'There are no changes to commit'
 _MISSING_SUMMARY_FIELDS = 'Expected at least "parent" and "message"; repository may be corrupted.'
 _UNKNOWN_REVISION = 'Unknown revision; could not run "update."'
+_BAD_DATE = 'Cannot parse this date.'
 # defaults
 _DEFAULT_COMMIT_MESSAGE = '(empty commit message)'
 _DEFAULT_USERNAME = '(unknown user)'
@@ -156,6 +157,7 @@ class Hug(object):
         :raises: :exc:`RuntimeError` if there are no added, deleted, modified, or removed files to
             commit. We could silently ignore this, but "hg commit" returns a 1 status code if there
             is nothing to commit, so this is more consistent.
+        :raises: :exc:`RuntimeError` if the date format is in invalid (cannot be parsed by Mercurial).
 
         If no commit message is supplied, a default is used.
 
@@ -163,13 +165,19 @@ class Hug(object):
         '''
         # don't try to commit if nothing has changed
         stat = self._repo.status()
-        if 0 == (len(stat.added) + len(stat.deleted) + len(stat.modified) + len(stat.removed)):
+        if (len(stat.added) + len(stat.deleted) + len(stat.modified) + len(stat.removed)) == 0:
             raise RuntimeError(_NOTHING_TO_COMMIT)
 
         if message is None:
             message = _DEFAULT_COMMIT_MESSAGE
 
-        commands.commit(self._ui, self._repo, message=message, user=self.username, date=date)
+        try:
+            commands.commit(self._ui, self._repo, message=message, user=self.username, date=date)
+        except error.Abort as err:
+            if 'invalid date' in err.message:
+                raise RuntimeError(_BAD_DATE)
+            else:
+                raise
 
     def _get_username(self):
         "Return the username in order of preference."
@@ -190,7 +198,7 @@ class Hug(object):
         self._username = None
 
     username = property(_get_username, _set_username, _del_username,
-        '''
+                        '''
         Username for commits.
 
         If you set the username, it will be used for every commit until you ``del`` to unset the

@@ -299,13 +299,43 @@ class TestCommit(object):
         with open(os.path.join(repo.repo_dir, 'boring'), 'w') as temp_file:
             temp_file.write('some file contents')
         subprocess.check_call(['hg', 'add', 'boring'], cwd=repo.repo_dir)
-        date = 'Tue Apr 19 15:00:00 2016 -0000'
+        date = '2016-04-19 15:00:00 -0000'
         expected_date = datetime.datetime(2016, 4, 19, 15, 0, 0)
 
         repo.commit(date=date)
 
         assert repo._repo[0].description() == hug._DEFAULT_COMMIT_MESSAGE
         assert expected_date == datetime.datetime.utcfromtimestamp(repo._repo[0].date()[0])
+
+    def test_date_and_message(self, repo):
+        '''
+        When there are changes to commit and both a date and message are given.
+        '''
+        # NB: this test assumes UTC timezone
+        with open(os.path.join(repo.repo_dir, 'boring'), 'w') as temp_file:
+            temp_file.write('some file contents')
+        subprocess.check_call(['hg', 'add', 'boring'], cwd=repo.repo_dir)
+        message = 'something'
+        date = '2016-04-19 15:00:00 -0000'
+        expected_date = datetime.datetime(2016, 4, 19, 15, 0, 0)
+
+        repo.commit(message=message, date=date)
+
+        assert repo._repo[0].description() == message
+        assert expected_date == datetime.datetime.utcfromtimestamp(repo._repo[0].date()[0])
+
+    def test_invalid_date(self, repo):
+        '''
+        When there is a date but it's invalid.
+        '''
+        with open(os.path.join(repo.repo_dir, 'boring'), 'w') as temp_file:
+            temp_file.write('some file contents')
+        subprocess.check_call(['hg', 'add', 'boring'], cwd=repo.repo_dir)
+        date = '2016-14-99 15:00:00 -0000'
+
+        with pytest.raises(RuntimeError) as exc:
+            repo.commit('a message', date=date)
+        assert exc.value.args[0] == hug._BAD_DATE
 
 
 def test_username_property(repo):
