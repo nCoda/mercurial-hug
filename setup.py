@@ -7,7 +7,7 @@
 # Filename:               setup.py
 # Purpose:                Configuration for installation with setuptools.
 #
-# Copyright (C) 2016 Christopher Antila
+# Copyright (C) 2016, 2017 Christopher Antila
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -26,23 +26,8 @@
 Configuration for installation with setuptools.
 '''
 
-from setuptools import setup, Command
+from setuptools import find_packages, setup
 import hug  # for __version__
-
-
-class PyTest(Command):
-    user_options = []
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        import subprocess
-        import sys
-        errno = subprocess.call([sys.executable, 'runtests.py'])
-        raise SystemExit(errno)
 
 
 with open('README.rst', 'r') as file_pointer:
@@ -51,12 +36,11 @@ with open('README.rst', 'r') as file_pointer:
 setup(
     name = 'mercurial-hug',
     version = hug.__version__,
-    packages = ['hug'],
+    packages = find_packages(),
+    include_package_data = True,
 
     install_requires = ['mercurial>3,<4'],
     tests_require = ['pytest>2.7,<3'],
-
-    cmdclass = {'test': PyTest},
 
     # metadata for upload to PyPI
     author = 'Christopher Antila',
@@ -66,7 +50,7 @@ setup(
     license = 'AGPLv3+',
     keywords = 'mercurial, vcs, version control, wrapper',
     url = 'https://goldman.ncodamusic.org/diffusion/10/',
-    classifiers =[
+    classifiers = [
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: Implementation :: CPython',
