@@ -1,2 +1,4 @@
 include LICENSE
 recursive-include tests *.py
+include versioneer.py
+include hug/_version.py

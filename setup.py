@@ -27,30 +27,32 @@ Configuration for installation with setuptools.
 '''
 
 from setuptools import find_packages, setup
-import hug  # for __version__
+from metadata import HUG_METADATA
+import versioneer
 
 
 with open('README.rst', 'r') as file_pointer:
     _LONG_DESCRIPTION = file_pointer.read()
 
 setup(
-    name = 'mercurial-hug',
-    version = hug.__version__,
-    packages = find_packages(),
-    include_package_data = True,
+    name=HUG_METADATA['name'],
+    version=versioneer.get_version(),
+    packages=find_packages(),
+    include_package_data=True,
 
-    install_requires = ['mercurial>3,<4'],
-    tests_require = ['pytest>2.7,<3'],
+    install_requires=['mercurial>3,<4'],
+    tests_require=['pytest>2.7,<3'],
+    cmdclass=versioneer.get_cmdclass(),
 
     # metadata for upload to PyPI
-    author = 'Christopher Antila',
-    author_email = 'christopher@antila.ca',
-    description = 'A wrapper for select Mercurial functionality.',
-    long_description = _LONG_DESCRIPTION,
-    license = 'AGPLv3+',
-    keywords = 'mercurial, vcs, version control, wrapper',
-    url = 'https://goldman.ncodamusic.org/diffusion/10/',
-    classifiers = [
+    author=HUG_METADATA['author'],
+    author_email=HUG_METADATA['author_email'],
+    description=HUG_METADATA['description'],
+    long_description=_LONG_DESCRIPTION,
+    license=HUG_METADATA['license'],
+    keywords='mercurial, vcs, version control, wrapper',
+    url=HUG_METADATA['url'],
+    classifiers=[
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: Implementation :: CPython',
